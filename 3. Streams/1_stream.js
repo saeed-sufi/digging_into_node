@@ -11,7 +11,7 @@ const util = require("util")
 const zlib = require("zlib")
 
 let args = minimist(process.argv.slice(2), {
-  boolean: ["help", "in", "out", "compress"],
+  boolean: ["help", "in", "out", "compress", "uncompress"],
   string: ["file"],
 })
 
@@ -34,6 +34,11 @@ if (args.help) {
 function processFile(inStream) {
   let outStream = inStream
 
+  if (args.uncompress) {
+    let gunzipStream = zlib.createGunzip()
+    outStream = outStream.pipe(gunzipStream)
+  }
+  
   let upStream = new Transform({
     transform(chunk, enc, cb) {
       this.push(chunk.toString().toUpperCase())
@@ -74,5 +79,6 @@ function printHelp() {
   console.log("--in, -               process stdin")
   console.log("--out                 print to stdout")
   console.log("--compress            gzip the output")
+  console.log("--uncompress          un-gzip the input")
   console.log("")
 }
